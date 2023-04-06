@@ -134,7 +134,6 @@ class Banco():
         print("Cuenta en pesos:")
         print(f"${self.usuario['balance_de_cuenta']} MXN")
         input("\nEnter para continuar")
-        # pass
 
     # Depositar a Cuenta Propia
     def depositar_cuenta_propia(self, cantidad):
@@ -278,7 +277,6 @@ def app():
             case otra:
                 print(f"{otra} no es valido")
                 input("\nEnter para continuar")
-    # pass
 
 
 def inicio():
