@@ -1,3 +1,8 @@
+"""
+Es un proyecto de consola, el cual te permite realizar operaciones en una o más cuentas bancarias,
+crear una cuenta, depositar un una cuenta propia, retirar, depositar en una cuenta de terceros,
+salir del programa. El programa funciona con una base de datos en JSON.
+"""
 import os
 import re
 import json
@@ -5,29 +10,32 @@ from uuid import uuid4
 
 # Leer Base de Datos
 def leer_bd():
-    bd = open("./Banco_bd.json", "r") 
-    data = json.load(bd) 
+    """Lee la base de datos"""
+    bd = open("./Banco_bd.json", "r")
+    data = json.load(bd)
 
     bd.close()
     return data
 
 # Guardar en Base de Datos
 def guardar_bd(persona, metodo, cuenta = ""):
+    """Guarda en la base de datos"""
     data = leer_bd()
     with open("./Banco_bd.json", "w") as bd:
         match metodo:
             case "guardar":
                 data.append(persona)
-                json.dump(data, bd)                
+                json.dump(data, bd)
                 bd.close()
             case "actualizar":
                 lista_a_actualizar = list(filter(lambda x: x["cuenta"] != cuenta, data))
                 lista_a_actualizar.append(persona)
-                json.dump(lista_a_actualizar, bd)                
+                json.dump(lista_a_actualizar, bd)
                 bd.close()
 
 # Clase Persona
 class Persona():
+    """Clase Persona"""
     is_nombre = False
 
     def __init__(self, nombre, apellido) -> None:
@@ -35,25 +43,27 @@ class Persona():
         self.apellido = apellido
         self.nombre_completo = f"{self.nombre} {self.apellido}"
         self.verificar_nombre_de_usuario()
-    
+
     def verificar_nombre_de_usuario(self):
-        # Ejemplo de Nombre = Juan Perez
-        self.is_nombre = bool( 
-            re.fullmatch( 
-                "[A-Za-z]{2,25}( [A-Za-z]{2,25})?", 
-                self.nombre_completo  
-            ) 
+        """Verifica el nombre del usuario Ejemplo de Nombre = Juan Perez"""
+        self.is_nombre = bool(
+            re.fullmatch(
+                "[A-Za-z]{2,25}( [A-Za-z]{2,25})?",
+                self.nombre_completo
+            )
         )
 
 # Clase Cliente
 class Cliente():
+    """Clase Cliente"""
     cuenta = None
     balance_de_cuenta = 0
 
     def __init__(self, persona) -> None:
         self.persona = persona
-    
+
     def crear_cuenta(self):
+        """Crea una nueva cuenta"""
         if self.persona.is_nombre:
             data = leer_bd()
 
@@ -77,17 +87,19 @@ class Cliente():
             print(f"Tu numero de cuenta es: {self.cuenta}")
 
             input("\nEnter para continuar")
-            return True 
+            return True
         else:
             print("Los datos ingresados son incorrectos")
             input("\nEnter para continuar")
             return False
 
-    def detalles_de_cuenta():
-        pass
+    # def detalles_de_cuenta():
+    #     """Detalles de la cuenta"""
+    #     pass
 
 # Clase banco - logica del banco
 class Banco():
+    """Clase Banco"""
     usuario = ""
 
     def __init__(self, cuenta_numero = "") -> None:
@@ -96,37 +108,41 @@ class Banco():
 
     # Buscar al usaurio
     def buscar_usuario(self, cuenta):
+        """Busca un usuario"""
         data = leer_bd()
         res = list(filter(lambda x: x["cuenta"] == cuenta, data))
 
         if len(res) != 0:
             return res
-        
+
         print("No se ha encontrado al usuario")
         input("\nEnter para continuar")
         return False
-    
+
     # Crear cuenta
     def crear_cuenta(self, nombre, apellido):
+        """Crea una nueva cuenta"""
         nueva_persona = Persona(nombre, apellido)
         nuevo_cliente = Cliente(nueva_persona)
         nuevo_cliente.crear_cuenta()
-        
+
     # Revisar Balance
     def revisar_balance(self):
+        """Revisa el balance de la cuenta"""
         # Busca al Usuario
         self.usuario = self.buscar_usuario(self.cuenta)[0]
         print("Cuenta en pesos:")
         print(f"${self.usuario['balance_de_cuenta']} MXN")
         input("\nEnter para continuar")
-        pass
+        # pass
 
     # Depositar a Cuenta Propia
     def depositar_cuenta_propia(self, cantidad):
+        """Deposita a cuenta propia"""
         # Busca al usuario
         self.usuario = self.buscar_usuario(self.cuenta)[0]
 
-        if cantidad > 0: 
+        if cantidad > 0:
             self.usuario["balance_de_cuenta"] += cantidad
             # Salvar en la base de datos
             guardar_bd(self.usuario, "actualizar", self.cuenta)
@@ -135,14 +151,15 @@ class Banco():
         else:
             print("Cantidad incorrecta o no valida")
             input("\nEnter para continuar")
-        
-    
+
+
     # Deposito a Cuenta de Terceros
     def deposito_terceros(self, cuenta_terceros, cantidad):
+        """Deposita a cuenta de terceros"""
         usuario_objetivo = self.buscar_usuario(cuenta_terceros)[0]
-        
-        if cantidad > 0: 
-            usuario_objetivo["balance_de_cuenta"] += cantidad 
+
+        if cantidad > 0:
+            usuario_objetivo["balance_de_cuenta"] += cantidad
             # Actualizar en Base de Datos
             guardar_bd(usuario_objetivo, "actualizar", cuenta_terceros)
             print(f"Has depositado {cantidad} pesos a cuenta de terceros")
@@ -153,6 +170,7 @@ class Banco():
 
     # Retirar
     def withdrawals(self, cantidad):
+        """Retirar"""
         self.usuario = self.buscar_usuario(self.cuenta)[0]
 
         if cantidad > 0 and cantidad < self.usuario["balance_de_cuenta"]:
@@ -161,12 +179,13 @@ class Banco():
             print(f"Has retirado {cantidad}.")
             print(f"Tu saldo total es de: {self.usuario['balance_de_cuenta']}")
             input("\nEnter para continuar")
-        else: 
+        else:
             print("Cantidad incorrecta o no valida")
             input("\nEnter para continuar")
 
 
 def app():
+    """APP"""
 
     OPCIONES = [
         "[0] - Crea una cuenta",
@@ -191,7 +210,7 @@ def app():
 
         for opcion in OPCIONES:
             print(opcion)
-        
+
         print("\n")
         entrada_usuario = input("Escoge una opción: ")
 
@@ -201,7 +220,7 @@ def app():
                 print("--------------")
                 print("  Formulario  ")
                 print("--------------")
-                
+
                 nombre = str(input("Cuál es tu nombre?: "))
                 apellido = str(input("Cuál es tu apellido?: "))
 
@@ -211,12 +230,12 @@ def app():
                 while True:
                     cuenta = str(input("Ingresa el numero de tu cuenta: "))
                     usuario_cuenta = Banco().buscar_usuario(cuenta)
-                    
+
                     if not usuario_cuenta:
-                        break 
+                        break
 
                     usuario_cuenta = Banco(cuenta)
-                
+
                     while True:
                         os.system("clear" or "cls")
                         print("-------------------------")
@@ -225,7 +244,7 @@ def app():
                         for opcion_banca in OPCIONES_BANCA:
                             print(opcion_banca)
                         print("\n")
-                        seleccion_opcion_banca = input("Escoge una opción: ")   
+                        seleccion_opcion_banca = input("Escoge una opción: ")
 
                         match seleccion_opcion_banca:
                             case "0":
@@ -259,11 +278,12 @@ def app():
             case otra:
                 print(f"{otra} no es valido")
                 input("\nEnter para continuar")
-    pass
+    # pass
 
-    
+
 def inicio():
+    """Inicio de APP"""
     app()
-    
+
 
 inicio()
