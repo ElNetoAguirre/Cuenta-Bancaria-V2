@@ -11,7 +11,7 @@ from uuid import uuid4
 # Leer Base de Datos
 def leer_bd():
     """Lee la base de datos"""
-    bd = open("./Banco_bd.json", "r")
+    bd = open("./Banco_bd.json", "r", encoding="utf-8")
     data = json.load(bd)
 
     bd.close()
@@ -21,7 +21,7 @@ def leer_bd():
 def guardar_bd(persona, metodo, cuenta = ""):
     """Guarda en la base de datos"""
     data = leer_bd()
-    with open("./Banco_bd.json", "w") as bd:
+    with open("./Banco_bd.json", "w", encoding="utf-8") as bd:
         match metodo:
             case "guardar":
                 data.append(persona)
